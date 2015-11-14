@@ -2,28 +2,26 @@
  * Created by weijieyu on 15/11/4
  */
 function Template() {//简单模板替换
-
+	this.tpl = document.getElementById('myTmpl').innerHTML
 }
 
-Template.prototype.init = function(tpl,model) {
-	this.tpl = tpl
+Template.prototype.init = function(model) {
 	this.model = model
 	if (!model.length) {//model为单一json
-		return this.render(model, tpl)//返回data替换处理结果
+		return this.render(model)//返回data替换处理结果
 	} else {//model为arr放置json
 		return this.arrRen()
 	}
 }
 
-Template.prototype.render = function(model, tpl) {//$$内数据替换  
+Template.prototype.render = function(model) {//$$内数据替换  
 	var reg = new RegExp('\\$([\\w|\||\\s|\-]+)\\$', 'g')
 	var This = this
-	tpl = tpl.replace(reg, function() {
+	this.tpl = this.tpl.replace(reg, function() {
 		arguments[1] = arguments[1].replace(/\s/g,'')//空格兼容，有利排版
 
 		if (arguments[1].indexOf('v-') == 0) {//是否使用v-控制显示隐藏的指令
 			var val = arguments[1].substring(2)//获取出属性
-			console.log(This.vShow(model[val]))
 			return This.vShow(model[val])//返回处理后的display值
 		}
 
@@ -34,7 +32,7 @@ Template.prototype.render = function(model, tpl) {//$$内数据替换
 			return This.filters[tmpA[1]](model[tmpA[0]])
 		}
 	})
-	return tpl
+	return this.tpl
 }
 
 Template.prototype.vShow = function(val) { //实现类似v-show功能  //判断条件是Number(val)
@@ -50,15 +48,13 @@ Template.prototype.arrRen = function() {
 	return html
 }
 
-Template.prototype.filters = {//自定义滤镜功能填写
-	test: function (value) {
-		return value+'haha'
-	}
+Template.prototype.filters = {//接收自定义滤镜
+	
 }
 
 /* html中的用法   
 
-<script type="text/tmpl" id="myTmpl">
+<script type="text/tmpl" id="myTmpl"> //注意这个要写在itmp.js的前边
 终于不用千辛万苦的字符串拼接了，放在这里边自带两边的引号
 
 tpl语法
@@ -74,9 +70,13 @@ tpl语法
 </script>
 */
 
-/* js中的用法
-var tpl = document.getElementById('myTmpl').innerHTML//获取模板
+/* js中的用法  每次需要动的就是model   //todo 复杂model的处理   //如何更好的完善，全面向实战靠拢
 var t = new Template()//实例化
-var html = t.init(tpl, model)//接收str结果
+
+t.filter.test = function () {} //这里添加filter更方便合理
+
+var html = t.init(tpl, model)//接收str结果  //model支持简单json和json放数组中
+
 $('body')[0].innerHTML += html//写入到特定的容器中
+
 */
